@@ -7,6 +7,7 @@ WORKDIR /app
 # Install deps
 COPY package*.json ./
 COPY tsconfig*.json ./
+COPY .env.production .env.production
 RUN npm install
 
 # Copy source
