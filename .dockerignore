@@ -20,7 +20,6 @@ yarn-error.log*
 
 # Env / secrets (adjust as needed)
 .env
-.env.*
 !.env.example
 
 # Local config not needed in image
