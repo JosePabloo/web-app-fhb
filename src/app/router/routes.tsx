@@ -4,6 +4,7 @@
 import { lazy } from 'react';
 import AuthLayout from '../layouts/AuthLayout';
 import PublicGuard from './PublicGuard';
+import config from '../../shared/config/env';
 
 const RootRoute = lazy(() => import('../../features/app/routes/Root'));
 const LoginWithWebAuthn = lazy(() => import('../../features/auth/routes/LoginWithWebAuthn'));
@@ -11,8 +12,13 @@ const VerifyOTP = lazy(() => import('../../features/auth/routes/VerifyOTP'));
 const Dashboard = lazy(() => import('../../features/dashboard/routes/Dashboard'));
 const AccountSettings = lazy(() => import('../../features/settings/routes/AccountSettings'));
 const NotFound = lazy(() => import('../../features/app/routes/NotFound'));
+const UnderConstruction = lazy(() => import('../../features/app/routes/UnderConstruction'));
 
-export const routeConfig = [
+const isUnderConstruction = config.featureFlags?.underConstruction ?? false;
+
+const maintenanceRoutes = [{ path: '*', element: <UnderConstruction /> }] as const;
+
+const baseRoutes = [
   {
     element: <PublicGuard />,
     children: [
@@ -33,3 +39,5 @@ export const routeConfig = [
     element: <NotFound />,
   },
 ] as const;
+
+export const routeConfig = isUnderConstruction ? maintenanceRoutes : baseRoutes;

@@ -59,6 +59,9 @@ VITE_BACKEND_API_URL=https://api.example.com
 ```
 `shared/config/env.ts` validates required vars at startup; app fails fast if misconfigured.
 
+Optional:
+- `VITE_UNDER_CONSTRUCTION=true` to route every path to the under-construction screen during active development (overrides auth).
+
 ---
 ## 5. Authentication Flows
 Implemented in `core/auth`:

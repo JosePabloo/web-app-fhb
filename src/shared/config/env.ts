@@ -18,6 +18,8 @@ if (missing.length) {
   throw new Error(`Missing required env variables: ${missing.join(', ')}`);
 }
 
+const underConstruction = env.VITE_UNDER_CONSTRUCTION === 'true';
+
 export const config = {
   apiBase: env.VITE_API_CASA_NORTE_SPREAD_SYNC_URL ?? '',
   authApiBase: env.VITE_API_CASA_NORTE_AUTH_URL ?? '',
@@ -29,6 +31,9 @@ export const config = {
     storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
     messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID,
     databaseURL: env.VITE_FIREBASE_DATABASE_URL,
+  },
+  featureFlags: {
+    underConstruction,
   },
 };
 
