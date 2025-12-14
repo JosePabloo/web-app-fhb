@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 140" role="img" aria-labelledby="title desc">
+  <title id="title">Casa Norte logo</title>
+  <desc id="desc">Square frame with angular circuit paths and node; CASA NORTE wordmark with tagline Ideas Becoming Systems.</desc>
+  <style>
+    .frame { fill: none; stroke: #0B1A2A; stroke-width: 6; stroke-linejoin: round; }
+    .path { fill: none; stroke: #1E3B55; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+    .node { fill: #8AB4D6; }
+    .word { fill: #0B1A2A; font-family: "Space Grotesk", "Plus Jakarta Sans", "Inter Tight", system-ui, -apple-system, "Segoe UI", sans-serif; font-weight: 700; letter-spacing: 0.05em; }
+    .tag { fill: #0B1A2A; font-family: "Space Grotesk", "Plus Jakarta Sans", "Inter Tight", system-ui, -apple-system, "Segoe UI", sans-serif; font-weight: 600; letter-spacing: 0.02em; font-size: 14px; }
+  </style>
+  <g transform="translate(12 12)">
+    <rect class="frame" x="0" y="0" width="104" height="104" rx="3" />
+    <path class="path" d="M18 82 L50 50 L84 50" />
+    <path class="path" d="M26 32 L26 68 L60 100" />
+    <path class="path" d="M58 18 L92 18 L92 52" />
+    <circle class="node" cx="58" cy="50" r="7" />
+  </g>
+  <text class="word" x="140" y="60" font-size="34">CASA NORTE</text>
+  <text class="tag" x="140" y="88">IDEAS BECOMING SYSTEMS.</text>
+</svg>

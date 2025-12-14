@@ -1,0 +1,32 @@
+/* index.css — MUI-first base reset */
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* Prevents unwanted scrollbars when using 100vh layouts */
+body {
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Reset links */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Make buttons inherit font styles */
+button {
+  font-family: inherit;
+}
