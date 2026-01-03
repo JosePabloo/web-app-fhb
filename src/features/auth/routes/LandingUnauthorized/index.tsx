@@ -22,7 +22,6 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
 import logo from '../../../../assets/frosthaven.png';
 import bathroomImage from '../../../../assets/bathroom.png';
 import homeImage from '../../../../assets/home.png';
@@ -123,8 +122,8 @@ function HeroSection() {
                 <Button
                   variant="contained"
                   color="primary"
-                  component={RouterLink}
-                  to="/login"
+                  component="a"
+                  href={SHOP_URL}
                   sx={{
                     px: 3,
                     py: 1.4,
@@ -735,22 +734,8 @@ function FooterSection() {
           <Box sx={{ justifySelf: { xs: 'start', md: 'end' } }}>
             <Stack direction="row" spacing={2} justifyContent={{ xs: 'flex-start', md: 'flex-end' }}>
               <Button
-                component={RouterLink}
-                to="/login"
-                variant="outlined"
-                sx={{
-                  color: '#fff',
-                  borderColor: palette.mist,
-                  textTransform: 'none',
-                  fontFamily: typography.body,
-                  '&:hover': { borderColor: palette.ice, backgroundColor: 'rgba(111,177,255,0.08)' },
-                }}
-              >
-                Login
-              </Button>
-              <Button
-                component={RouterLink}
-                to="/login"
+                component="a"
+                href={SHOP_URL}
                 variant="contained"
                 sx={{
                   backgroundColor: palette.ice,
@@ -796,21 +781,6 @@ function TopBar() {
             sx={{ color: palette.frost, textTransform: 'none', fontWeight: 600, fontFamily: typography.body }}
           >
             Shop now
-          </Button>
-          <Button
-            component={RouterLink}
-            to="/login"
-            variant="contained"
-            sx={{
-              backgroundColor: palette.ice,
-              color: palette.charcoal,
-              fontWeight: 700,
-              textTransform: 'none',
-              fontFamily: typography.body,
-              '&:hover': { backgroundColor: '#5a9ee8' },
-            }}
-          >
-            Login
           </Button>
         </Stack>
       </Toolbar>

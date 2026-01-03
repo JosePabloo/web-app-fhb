@@ -41,7 +41,6 @@ describe('RootRoute', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/Built for Minnesota winters/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Login/i)[0]).toBeInTheDocument();
+    expect(screen.getByText(/Discover the perfect interior solutions for every room/i)).toBeInTheDocument();
   });
 });
