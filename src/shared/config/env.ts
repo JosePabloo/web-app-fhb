@@ -2,6 +2,7 @@
 // PURPOSE: Validates required environment variables and exposes structured config object (API + Firebase settings).
 // NOTES: Imported at startup (main.tsx) for fail-fast validation and reused by firebase config and API clients.
 
+// Adding required env variables here prevents the add from starting. 
 const required = [
   'VITE_API_CASA_NORTE_SPREAD_SYNC_URL',
   'VITE_API_CASA_NORTE_AUTH_URL',
@@ -9,6 +10,7 @@ const required = [
   'VITE_FIREBASE_AUTH_DOMAIN',
   'VITE_FIREBASE_PROJECT_ID',
   'VITE_FIREBASE_APP_ID',
+  'VITE_CASA_NORTE_APPLICATION'
 ];
 
 const env = import.meta.env as Record<string, string | undefined>;
@@ -18,9 +20,8 @@ if (missing.length) {
   throw new Error(`Missing required env variables: ${missing.join(', ')}`);
 }
 
-const underConstruction = env.VITE_UNDER_CONSTRUCTION === 'true';
-
 export const config = {
+  application:env.VITE_CASA_NORTE_APPLICATION,
   apiBase: env.VITE_API_CASA_NORTE_SPREAD_SYNC_URL ?? '',
   authApiBase: env.VITE_API_CASA_NORTE_AUTH_URL ?? '',
   firebase: {
@@ -33,7 +34,7 @@ export const config = {
     databaseURL: env.VITE_FIREBASE_DATABASE_URL,
   },
   featureFlags: {
-    underConstruction,
+    underConstruction: env.VITE_UNDER_CONSTRUCTION === 'true',
   },
 };
 

@@ -3,8 +3,8 @@
 // NOTES: Enforces provider usage (throws if missing) forming boundary between feature code and auth implementation.
 
 import { useContext } from 'react';
-import type { AuthContextType } from './AuthProvider';
-import { AuthContext } from './AuthProvider';
+import type { AuthContextType } from './AuthContext';
+import { AuthContext } from './AuthContext';
 
 export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);

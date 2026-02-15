@@ -32,7 +32,7 @@ describe('routeConfig', () => {
     const { routeConfig } = await import('./routes');
 
     expect(routeConfig).toHaveLength(1);
-    expect((routeConfig as any)[0].path).toBe('*');
+    expect((routeConfig as readonly { path: string }[])[0].path).toBe('*');
   });
 
   it('uses base routes when under construction flag is off', async () => {

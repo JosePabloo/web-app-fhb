@@ -9,7 +9,7 @@ import OnboardingGate from './OnboardingGate';
 const showModal = vi.fn();
 const closeModal = vi.fn();
 
-vi.mock('../../../core/ui/ModalHostProvider', () => ({
+vi.mock('../../../core/ui/useModalHost', () => ({
   useModalHost: () => ({ showModal, closeModal, activeModalId: null, resetSession: vi.fn() }),
 }));
 

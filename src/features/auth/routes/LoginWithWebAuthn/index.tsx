@@ -9,6 +9,7 @@ import PageWrapper from '../../../../app/layouts/PageWrapper';
 import { useLoading } from '../../../../core/loading/useLoading';
 import { useAuth } from '../../../../core/auth/useAuth';
 import { useSnackbar } from '../../../../core/notifications/useSnackbar';
+import { useAutoPasskeyLaunch } from '../../hooks/useAutoPasskeyLaunch';
 
 export default function LoginWithWebAuthn() {
   const { registerCredential, authenticateCredential } = useAuth();
@@ -18,6 +19,9 @@ export default function LoginWithWebAuthn() {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const navigate = useNavigate();
+
+  // Enable automatic passkey launch when this component mounts
+  useAutoPasskeyLaunch(true);
 
   useEffect(() => {
     // Ensure Recaptcha is initialized if using OTP
@@ -43,7 +47,7 @@ export default function LoginWithWebAuthn() {
   const handleAuthenticate = async () => {
     showLoading();
     try {
-      await authenticateCredential();
+      await authenticateCredential({ mode: 'default' });
       navigate('/dashboard');
     } catch (err) {
       showError((err as Error).message);
