@@ -30,6 +30,7 @@ describe('routeConfig', () => {
     vi.doMock('../layouts/AuthLayout', () => ({ __esModule: true, default: () => null }));
     mockEnvModule(true);
     const { routeConfig } = await import('./routes');
+    const maintenanceRoute = routeConfig[0] as { path?: string };
 
     expect(routeConfig).toHaveLength(1);
     expect((routeConfig as readonly { path: string }[])[0].path).toBe('*');
@@ -45,9 +46,13 @@ describe('routeConfig', () => {
     const hasDashboard = routeConfig.some(
       (route) => 'children' in route && route.children?.some((child) => child.path === '/dashboard')
     );
+    const hasContact = routeConfig.some(
+      (route) => 'children' in route && route.children?.some((child) => child.path === '/contact')
+    );
     const hasNotFound = routeConfig.some((route) => 'path' in route && route.path === '*');
 
     expect(hasDashboard).toBe(true);
+    expect(hasContact).toBe(true);
     expect(hasNotFound).toBe(true);
   });
 });
