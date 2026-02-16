@@ -41,6 +41,6 @@ describe('RootRoute', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/Please login to continue/i)).toBeInTheDocument();
+    expect(screen.getByText(/Crafting Modern Homes That Endure\./i)).toBeInTheDocument();
   });
 });

@@ -8,7 +8,7 @@ import { render, screen } from '@testing-library/react';
 import PublicGuard from './PublicGuard';
 
 vi.mock('../../core/auth/useAuth', () => ({
-  useAuth: () => ({ isAuthenticated: (vi as any).mockedAuthState }),
+  useAuth: () => ({ isAuthenticated: (vi as unknown as { mockedAuthState: boolean }).mockedAuthState }),
 }));
 
 vi.mock('../layouts/PublicLayout', () => ({
@@ -18,7 +18,7 @@ vi.mock('../layouts/PublicLayout', () => ({
 
 describe('PublicGuard', () => {
   it('redirects authenticated users to /dashboard', () => {
-    (vi as any).mockedAuthState = true;
+    (vi as unknown as { mockedAuthState: boolean }).mockedAuthState = true;
 
     render(
       <MemoryRouter initialEntries={['/login']}>
@@ -33,7 +33,7 @@ describe('PublicGuard', () => {
   });
 
   it('renders public layout for unauthenticated users', () => {
-    (vi as any).mockedAuthState = false;
+    (vi as unknown as { mockedAuthState: boolean }).mockedAuthState = false;
 
     render(
       <MemoryRouter initialEntries={['/login']}>

@@ -1,85 +1,94 @@
 // FILE: src/core/auth/AuthProvider.tsx
-// PURPOSE: Provides global authentication context integrating Firebase, WebAuthn, OTP flows, and profile hydration.
-// NOTES: Handles persistence and hydration cooldown; exposes auth actions (OTP, WebAuthn, logout) consumed via useAuth inside AppProvider.
+// PURPOSE: Provides global authentication context integrating Firebase, WebAuthn, and profile hydration.
+// NOTES: Handles persistence and hydration cooldown; exposes auth actions (WebAuthn, logout) consumed via useAuth inside AppProvider.
 
-import React, { createContext, useEffect, useState } from 'react';
-import type { User, ConfirmationResult, UserCredential } from 'firebase/auth';
+import React, { useEffect, useState, useRef } from 'react';
+import type { User } from 'firebase/auth';
 import { onAuthStateChanged, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { auth } from '../../firebase/config';
 import { hydrateInitialState } from '../../features/auth/services/userService';
-import type { HydrateResponseDTO } from '../../types/auth';
 import { register as webauthnRegister, authenticate as webauthnAuthenticate } from '../../features/auth/services/webauthnClient';
-import { initRecaptcha, sendOtp as serviceSendOtp, signInWithToken, signOut as serviceSignOut } from '../../features/auth/services/authService';
+import { signInWithToken, signOut as serviceSignOut } from '../../features/auth/services/authService';
 import { useSnackbar } from '../notifications/useSnackbar';
 import { useNavigate } from 'react-router-dom';
-import { useModalHost } from '../ui/ModalHostProvider';
-
-export interface AuthContextType {
-  user: User | null;
-  profile: HydrateResponseDTO | null;
-  isAuthenticated: boolean;
-  sendOtp: (phone: string) => Promise<ConfirmationResult>;
-  confirmOtp: (code: string) => Promise<UserCredential>;
-  registerCredential: (username: string, phoneNumber: string, email: string) => Promise<void>;
-  authenticateCredential: () => Promise<void>;
-  logout: () => Promise<void>;
-}
-
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { useModalHost } from '../ui/useModalHost';
+import { AuthContext } from './AuthContext';
+import type { HydrateResponseDTO } from '../../types/auth';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<HydrateResponseDTO | null>(null);
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [loading, setLoading] = useState(true);
   const { showError } = useSnackbar();
   const navigate = useNavigate();
   const { resetSession } = useModalHost();
+
+  // Hydration tracking state using refs instead of window globals
+  const hydratedUidRef = useRef<string | null>(null);
+  const cooldownUntilMs = useRef<number>(0);
+  const inflight = useRef<boolean>(false);
 
   useEffect(() => {
     setPersistence(auth, browserLocalPersistence).catch((err) => console.warn('Failed to set persistence', err));
 
     const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
-      setLoading(false);
+      
       if (firebaseUser) {
-        try {
-          initRecaptcha();
-        } catch {
-          console.warn('initRecaptcha failed');
-        }
-
         const uid = firebaseUser.uid;
-        // @ts-expect-error - tracking on window for debugging
-        window.__lastHydratedUid = window.__lastHydratedUid ?? null;
-        // @ts-expect-error - tracking on window for debugging
-        window.__lastHydrationFailedAt = window.__lastHydrationFailedAt ?? 0;
+        
+        // Clear profile immediately if UID changes to prevent data leakage
+        if (hydratedUidRef.current !== uid) {
+          setProfile(null);
+          hydratedUidRef.current = null;
+          cooldownUntilMs.current = 0;
+        }
         const COOLDOWN_MS = 30 * 1000;
-        // @ts-expect-error - tracking on window for debugging
-        if (Date.now() - window.__lastHydrationFailedAt < COOLDOWN_MS) {
+        
+        // Prevent hydration if already in cooldown
+        if (Date.now() < cooldownUntilMs.current) {
+          setLoading(false);
           return;
         }
-        // @ts-expect-error - tracking on window for debugging
-        if (window.__lastHydratedUid === uid) return;
+        
+        // Prevent hydration if same user already successfully hydrated
+        if (hydratedUidRef.current === uid) {
+          setLoading(false);
+          return;
+        }
+        
+        // Prevent hydration if already in flight
+        if (inflight.current) {
+          setLoading(false);
+          return;
+        }
 
         try {
-          const token = await firebaseUser.getIdToken(true);
+          inflight.current = true;
+          const token = await firebaseUser.getIdToken();
           const userHydrationDetails = await hydrateInitialState(token);
           setProfile(userHydrationDetails);
-          // @ts-expect-error - tracking on window for debugging
-          window.__lastHydratedUid = uid;
+          hydratedUidRef.current = uid; // Mark uid as successfully hydrated
+          cooldownUntilMs.current = 0; // Reset cooldown on success
         } catch (err) {
           console.error('Failed to fetch user profile', err);
           setProfile(null);
-          showError('Failed to load user profile');
-          // @ts-expect-error - tracking on window for debugging
-          window.__lastHydrationFailedAt = Date.now();
+          cooldownUntilMs.current = Date.now() + COOLDOWN_MS;
+          // Only show error if this isn't the initial load
+          if (hydratedUidRef.current !== null) {
+            showError('Failed to load user profile');
+          }
+        } finally {
+          inflight.current = false;
+          setLoading(false);
         }
       } else {
         setProfile(null);
-        // @ts-expect-error - tracking on window for debugging
-        window.__lastHydratedUid = null;
+        hydratedUidRef.current = null;
+        cooldownUntilMs.current = 0;
+        inflight.current = false;
         resetSession();
+        setLoading(false);
       }
     });
 
@@ -88,37 +97,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [resetSession, showError]);
 
-  const sendOtp = async (phone: string) => {
-    try {
-      const confirmation = await serviceSendOtp(phone);
-      setConfirmationResult(confirmation);
-      return confirmation;
-    } catch (err) {
-      console.error('sendOtp failed', err);
-      showError((err as Error)?.message ?? 'Failed to send OTP');
-      throw err;
-    }
-  };
-
-  const confirmOtp = async (code: string) => {
-    try {
-      if (!confirmationResult) throw new Error('No OTP request in progress');
-      const credential = await confirmationResult.confirm(code);
-      return credential;
-    } catch (err) {
-      console.error('confirmOtp failed', err);
-      showError((err as Error)?.message ?? 'Failed to confirm OTP');
-      throw err;
-    }
-  };
 
   const registerCredential = async (
     username: string,
-    phoneNumber: string,
-    email: string
+    email: string,
+    phoneNumber?: string,
+    inviteId?: string,
   ): Promise<void> => {
     try {
-      const jwt = await webauthnRegister(username, phoneNumber, email);
+      const jwt = await webauthnRegister(username, email, phoneNumber, inviteId);
       await signInWithToken(jwt);
     } catch (error) {
       console.error('registerCredential failed', error);
@@ -127,12 +114,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const authenticateCredential = async (): Promise<void> => {
+  const authenticateCredential = async (opts?: { silent?: boolean; mode?: 'default' | 'conditional' }): Promise<void> => {
     try {
-      const jwt = await webauthnAuthenticate();
+      console.log('Starting WebAuthn authentication');
+      const jwt = await webauthnAuthenticate(opts?.mode);
       await signInWithToken(jwt);
     } catch (err) {
       console.error('authenticateCredential failed', err);
+      
+      // Silently handle expected errors when silent mode is enabled
+      if (opts?.silent && (err instanceof Error)) {
+        const errorName = err.name;
+        if (errorName === 'NotAllowedError' || errorName === 'AbortError') {
+          return;
+        }
+      }
+      
       showError((err as Error)?.message ?? 'Authentication failed');
       throw err;
     }
@@ -173,16 +170,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        profile,
-        isAuthenticated: !!user,
-        sendOtp,
-        confirmOtp,
-        registerCredential,
-        authenticateCredential,
-        logout,
-      }}
+        value={{
+          user,
+          profile,
+          isAuthenticated: !!user,
+          isLoading: loading,
+          registerCredential,
+          authenticateCredential,
+          logout,
+        }}
     >
       {children}
     </AuthContext.Provider>

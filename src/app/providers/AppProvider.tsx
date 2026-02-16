@@ -16,7 +16,7 @@ import { ModalHostProvider } from '../../core/ui/ModalHostProvider';
 import OnboardingGate from '../../features/onboarding/components/OnboardingGate';
 
 import { useMemo, useState } from 'react';
-import { ThemeModeProvider } from './ThemeModeContext';
+import { ThemeModeProvider } from './ThemeModeProvider';
 
 export function AppProvider() {
   const [mode, setMode] = useState<'light' | 'dark'>('light');

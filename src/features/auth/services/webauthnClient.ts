@@ -25,17 +25,26 @@ function getCurrentRpId(): string | null {
 
 export async function register(
   username: string,
-  phoneNumber: string,
   email: string,
+  phoneNumber?: string,
+  inviteId?: string,
 ): Promise<string> {
   if (!window.PublicKeyCredential) {
     console.warn('WebAuthn not supported');
     return '';
   }
 
+  const requestBody: Record<string, string> = { username, email, application };
+  if (inviteId) {
+    requestBody.inviteId = inviteId;
+  }
+  if (phoneNumber) {
+    requestBody.phoneNumber = phoneNumber;
+  }
+  
   const regRes = await casaNorteAuthApi.post<ApiResponse<StartRegistrationData>>(
     '/casa-norte/webauthn/registrations',
-    { username, phoneNumber, email, application },
+    requestBody,
   );
   const { id: provisionalId, options } = regRes.data.data;
 
@@ -73,7 +82,17 @@ export async function register(
   return finishRes.data.data.jwtToken;
 }
 
-export async function authenticate(): Promise<string> {
+// Type guard for conditional mediation availability
+function isConditionalMediationAvailable(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    window.PublicKeyCredential &&
+    'isConditionalMediationAvailable' in window.PublicKeyCredential &&
+    typeof (window.PublicKeyCredential as { isConditionalMediationAvailable?: unknown }).isConditionalMediationAvailable === 'function'
+  );
+}
+
+export async function authenticate(mode: 'default' | 'conditional' = 'default'): Promise<string> {
   if (!window.PublicKeyCredential) {
     console.warn('WebAuthn not supported');
     return '';
@@ -87,10 +106,10 @@ export async function authenticate(): Promise<string> {
   const { id: provisionalId, options } = authRes.data.data;
   const opts = options as PublicKeyCredentialRequestOptionsJSON;
 
-  const rpIdFromServer = typeof opts.rpId === 'string' ? opts.rpId : (opts.rpId as any);
+  const rpIdFromServer = typeof opts.rpId === 'string' ? opts.rpId : (opts.rpId as { id?: string }).id ?? '';
   const domain = getCurrentRpId() ?? rpIdFromServer;
 
-  const assertionPayload = await webauthnClient.authenticate({
+  const authOptions = {
     challenge: opts.challenge,
     domain,
     timeout: opts.timeout,
@@ -101,7 +120,21 @@ export async function authenticate(): Promise<string> {
         transports: c.transports!,
       })),
     userVerification: opts.authenticatorSelection?.userVerification,
-  });
+  };
+
+  // Add conditional mediation if supported and requested
+  if (mode === 'conditional' && isConditionalMediationAvailable()) {
+    try {
+      const isAvailable = await (window.PublicKeyCredential as { isConditionalMediationAvailable: () => Promise<boolean> }).isConditionalMediationAvailable();
+      if (isAvailable) {
+        (authOptions as { mediation?: string }).mediation = 'conditional';
+      }
+    } catch {
+      // Fall back to default if conditional check fails
+    }
+  }
+
+  const assertionPayload = await webauthnClient.authenticate(authOptions);
 
   const { id, rawId, type, response } = assertionPayload;
   const body = {

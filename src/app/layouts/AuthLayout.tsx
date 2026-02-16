@@ -4,8 +4,11 @@
 
 import { Outlet } from 'react-router-dom';
 import { Box } from '@mui/material';
-import Sidebar, { defaultNavItems } from '../../shared/components/layout/Sidebar';
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
+
+const Sidebar = lazy(() =>
+  import('../../shared/components/layout/Sidebar').then((m) => ({ default: m.default }))
+);
 
 export default function AuthLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -19,11 +22,9 @@ export default function AuthLayout() {
         overflowX: 'hidden',
       }}
     >
-      <Sidebar
-        open={sidebarOpen}
-        onToggle={() => setSidebarOpen((prev) => !prev)}
-        items={[...defaultNavItems]}
-      />
+      <Suspense fallback={null}>
+        <Sidebar open={sidebarOpen} onToggle={() => setSidebarOpen((prev) => !prev)} />
+      </Suspense>
 
       <Box
         component="main"
@@ -32,8 +33,10 @@ export default function AuthLayout() {
           display: 'flex',
           flexDirection: 'column',
           minWidth: 0,
+          // use minHeight so content taller than the viewport can scroll
           minHeight: '100dvh',
           p: 3,
+          // let the main area scroll vertically; children manage inner scroll containers
           overflowY: 'auto',
           transition: 'width 0.3s ease',
         }}
