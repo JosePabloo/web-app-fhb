@@ -16,7 +16,7 @@ vi.mock('../../../core/auth/useAuth', () => ({
   useAuth: () => ({ logout }),
 }));
 
-vi.mock('../../../app/providers/ThemeModeContext', () => ({
+vi.mock('../../../app/providers/useThemeMode', () => ({
   useThemeMode: () => ({ mode: 'light', toggle }),
 }));
 

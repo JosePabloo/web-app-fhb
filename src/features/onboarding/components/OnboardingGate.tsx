@@ -4,7 +4,7 @@
 
 import { useEffect } from 'react';
 import { useAuth } from '../../../core/auth/useAuth';
-import { useModalHost } from '../../../core/ui/ModalHostProvider';
+import { useModalHost } from '../../../core/ui/useModalHost';
 import OnboardingDialog from './OnboardingDialog';
 import { completeHydration } from '../../auth/services/userService';
 

@@ -2,23 +2,8 @@
 // PURPOSE: Global modal host that ensures a single dialog is rendered at a time and supports once-per-session modals.
 // NOTES: Consumers call useModalHost().showModal(...) with a component; the host injects onClose and prevents repeats when requested.
 
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
-
-export interface ModalDescriptor<TProps = Record<string, unknown>> {
-  id: string;
-  component: React.ComponentType<TProps>;
-  props?: TProps;
-  oncePerSession?: boolean;
-}
-
-interface ModalHostContextValue {
-  showModal: <TProps>(descriptor: ModalDescriptor<TProps>) => void;
-  closeModal: (id?: string) => void;
-  activeModalId: string | null;
-  resetSession: () => void;
-}
-
-const ModalHostContext = createContext<ModalHostContextValue | undefined>(undefined);
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { ModalHostContext, type ModalDescriptor } from './ModalHostContext';
 
 export function ModalHostProvider({ children }: { children: React.ReactNode }) {
   const dismissedIds = useRef<Set<string>>(new Set());
@@ -76,10 +61,4 @@ export function ModalHostProvider({ children }: { children: React.ReactNode }) {
       {ActiveComponent && injectedProps ? <ActiveComponent {...injectedProps} /> : null}
     </ModalHostContext.Provider>
   );
-}
-
-export function useModalHost(): ModalHostContextValue {
-  const ctx = useContext(ModalHostContext);
-  if (!ctx) throw new Error('useModalHost must be used within ModalHostProvider');
-  return ctx;
 }

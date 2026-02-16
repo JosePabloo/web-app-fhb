@@ -33,7 +33,7 @@ describe('routeConfig', () => {
     const maintenanceRoute = routeConfig[0] as { path?: string };
 
     expect(routeConfig).toHaveLength(1);
-    expect(maintenanceRoute.path).toBe('*');
+    expect((routeConfig as readonly { path: string }[])[0].path).toBe('*');
   });
 
   it('uses base routes when under construction flag is off', async () => {
