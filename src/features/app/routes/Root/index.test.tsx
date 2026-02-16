@@ -41,6 +41,6 @@ describe('RootRoute', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/Discover the perfect interior solutions for every room/i)).toBeInTheDocument();
+    expect(screen.getByText(/Crafting Modern Homes That Endure\./i)).toBeInTheDocument();
   });
 });

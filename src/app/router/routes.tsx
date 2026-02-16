@@ -9,6 +9,7 @@ import config from '../../shared/config/env';
 const RootRoute = lazy(() => import('../../features/app/routes/Root'));
 const LoginWithWebAuthn = lazy(() => import('../../features/auth/routes/LoginWithWebAuthn'));
 const VerifyOTP = lazy(() => import('../../features/auth/routes/VerifyOTP'));
+const Contact = lazy(() => import('../../features/auth/routes/Contact'));
 const Dashboard = lazy(() => import('../../features/dashboard/routes/Dashboard'));
 const AccountSettings = lazy(() => import('../../features/settings/routes/AccountSettings'));
 const NotFound = lazy(() => import('../../features/app/routes/NotFound'));
@@ -25,6 +26,7 @@ const baseRoutes = [
       { path: '/', element: <RootRoute /> },
       { path: '/login', element: <LoginWithWebAuthn /> },
       { path: '/verify', element: <VerifyOTP /> },
+      { path: '/contact', element: <Contact /> },
     ],
   },
   {
