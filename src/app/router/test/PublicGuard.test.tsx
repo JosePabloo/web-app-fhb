@@ -2,10 +2,12 @@
 // PURPOSE: Ensure authenticated users hitting public routes are redirected to dashboard and unauthenticated users see public layout.
 // NOTES: Mocks useAuth to control auth state; uses MemoryRouter for routing.
 
+import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
-import PublicGuard from './PublicGuard';
+import PublicGuard from '../PublicGuard';
+
 
 vi.mock('../../core/auth/useAuth', () => ({
   useAuth: () => ({ isAuthenticated: (vi as unknown as { mockedAuthState: boolean }).mockedAuthState }),

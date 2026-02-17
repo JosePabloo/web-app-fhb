@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
 
-import RootRoute from './index';
+import RootRoute from '../index';
 
 const mockAuthState = { isAuthenticated: false };
 

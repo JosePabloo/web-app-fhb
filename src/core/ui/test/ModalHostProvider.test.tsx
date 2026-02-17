@@ -5,8 +5,8 @@
 import { describe, expect, it } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
 import { useEffect } from 'react';
-import { ModalHostProvider } from './ModalHostProvider';
-import { useModalHost } from './useModalHost';
+import { ModalHostProvider } from '../ModalHostProvider';
+import { useModalHost } from '../useModalHost';
 
 function TestModal({ onClose, label }: { onClose: () => void; label: string }) {
   return (

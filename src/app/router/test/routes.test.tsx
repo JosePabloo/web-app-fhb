@@ -29,7 +29,7 @@ describe('routeConfig', () => {
     vi.doMock('./PublicGuard', () => ({ __esModule: true, default: () => null }));
     vi.doMock('../layouts/AuthLayout', () => ({ __esModule: true, default: () => null }));
     mockEnvModule(true);
-    const { routeConfig } = await import('./routes');
+    const { routeConfig } = await import('../routes');
     const maintenanceRoute = routeConfig[0] as { path?: string };
 
     expect(routeConfig).toHaveLength(1);
@@ -40,7 +40,7 @@ describe('routeConfig', () => {
     vi.doMock('./PublicGuard', () => ({ __esModule: true, default: () => null }));
     vi.doMock('../layouts/AuthLayout', () => ({ __esModule: true, default: () => null }));
     mockEnvModule(false);
-    const { routeConfig } = await import('./routes');
+    const { routeConfig } = await import('../routes');
 
     expect(routeConfig).toHaveLength(3);
     const hasDashboard = routeConfig.some(
