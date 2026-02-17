@@ -23,25 +23,39 @@ function getCurrentRpId(): string | null {
   }
 }
 
-export async function register(
-  username: string,
-  email: string,
-  phoneNumber?: string,
-  inviteId?: string,
-): Promise<string> {
+export interface RegisterParams {
+  username: string;
+  email: string;
+  phoneNumber?: string;
+  inviteId?: string;
+}
+
+export async function register({
+  username,
+  email,
+  phoneNumber,
+  inviteId,
+}: RegisterParams): Promise<string> {
   if (!window.PublicKeyCredential) {
     console.warn('WebAuthn not supported');
     return '';
   }
 
-  const requestBody: Record<string, string> = { username, email, application };
+  const requestBody: Record<string, string> = {
+    username,
+    email,
+    application,
+  };
   if (inviteId) {
     requestBody.inviteId = inviteId;
   }
   if (phoneNumber) {
     requestBody.phoneNumber = phoneNumber;
   }
-  
+  if (phoneNumber) {
+    requestBody.phoneNumber = phoneNumber;
+  }
+
   const regRes = await casaNorteAuthApi.post<ApiResponse<StartRegistrationData>>(
     '/casa-norte/webauthn/registrations',
     requestBody,
@@ -88,7 +102,8 @@ function isConditionalMediationAvailable(): boolean {
     typeof window !== 'undefined' &&
     window.PublicKeyCredential &&
     'isConditionalMediationAvailable' in window.PublicKeyCredential &&
-    typeof (window.PublicKeyCredential as { isConditionalMediationAvailable?: unknown }).isConditionalMediationAvailable === 'function'
+    typeof (window.PublicKeyCredential as { isConditionalMediationAvailable?: unknown })
+      .isConditionalMediationAvailable === 'function'
   );
 }
 
@@ -106,7 +121,8 @@ export async function authenticate(mode: 'default' | 'conditional' = 'default'):
   const { id: provisionalId, options } = authRes.data.data;
   const opts = options as PublicKeyCredentialRequestOptionsJSON;
 
-  const rpIdFromServer = typeof opts.rpId === 'string' ? opts.rpId : (opts.rpId as { id?: string }).id ?? '';
+  const rpIdFromServer =
+    typeof opts.rpId === 'string' ? opts.rpId : ((opts.rpId as { id?: string }).id ?? '');
   const domain = getCurrentRpId() ?? rpIdFromServer;
 
   const authOptions = {
@@ -125,7 +141,9 @@ export async function authenticate(mode: 'default' | 'conditional' = 'default'):
   // Add conditional mediation if supported and requested
   if (mode === 'conditional' && isConditionalMediationAvailable()) {
     try {
-      const isAvailable = await (window.PublicKeyCredential as { isConditionalMediationAvailable: () => Promise<boolean> }).isConditionalMediationAvailable();
+      const isAvailable = await (
+        window.PublicKeyCredential as { isConditionalMediationAvailable: () => Promise<boolean> }
+      ).isConditionalMediationAvailable();
       if (isAvailable) {
         (authOptions as { mediation?: string }).mediation = 'conditional';
       }

@@ -7,12 +7,18 @@ import type { User } from 'firebase/auth';
 import { onAuthStateChanged, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { auth } from '../../firebase/config';
 import { hydrateInitialState } from '../../features/auth/services/userService';
-import { register as webauthnRegister, authenticate as webauthnAuthenticate } from '../../features/auth/services/webauthnClient';
-import { signInWithToken, signOut as serviceSignOut } from '../../features/auth/services/authService';
+import {
+  register as webauthnRegister,
+  authenticate as webauthnAuthenticate,
+} from '../../features/auth/services/webauthnClient';
+import {
+  signInWithToken,
+  signOut as serviceSignOut,
+} from '../../features/auth/services/authService';
 import { useSnackbar } from '../notifications/useSnackbar';
 import { useNavigate } from 'react-router-dom';
 import { useModalHost } from '../ui/useModalHost';
-import { AuthContext } from './AuthContext';
+import { AuthContext, type RegisterCredentialParams } from './AuthContext';
 import type { HydrateResponseDTO } from '../../types/auth';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -29,14 +35,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const inflight = useRef<boolean>(false);
 
   useEffect(() => {
-    setPersistence(auth, browserLocalPersistence).catch((err) => console.warn('Failed to set persistence', err));
+    setPersistence(auth, browserLocalPersistence).catch((err) =>
+      console.warn('Failed to set persistence', err),
+    );
 
     const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
-      
+
       if (firebaseUser) {
         const uid = firebaseUser.uid;
-        
+
         // Clear profile immediately if UID changes to prevent data leakage
         if (hydratedUidRef.current !== uid) {
           setProfile(null);
@@ -44,19 +52,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           cooldownUntilMs.current = 0;
         }
         const COOLDOWN_MS = 30 * 1000;
-        
+
         // Prevent hydration if already in cooldown
         if (Date.now() < cooldownUntilMs.current) {
           setLoading(false);
           return;
         }
-        
+
         // Prevent hydration if same user already successfully hydrated
         if (hydratedUidRef.current === uid) {
           setLoading(false);
           return;
         }
-        
+
         // Prevent hydration if already in flight
         if (inflight.current) {
           setLoading(false);
@@ -97,15 +105,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [resetSession, showError]);
 
-
-  const registerCredential = async (
-    username: string,
-    email: string,
-    phoneNumber?: string,
-    inviteId?: string,
-  ): Promise<void> => {
+  const registerCredential = async (params: RegisterCredentialParams): Promise<void> => {
     try {
-      const jwt = await webauthnRegister(username, email, phoneNumber, inviteId);
+      const jwt = await webauthnRegister(params);
       await signInWithToken(jwt);
     } catch (error) {
       console.error('registerCredential failed', error);
@@ -114,22 +116,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const authenticateCredential = async (opts?: { silent?: boolean; mode?: 'default' | 'conditional' }): Promise<void> => {
+  const authenticateCredential = async (opts?: {
+    silent?: boolean;
+    mode?: 'default' | 'conditional';
+  }): Promise<void> => {
     try {
       console.log('Starting WebAuthn authentication');
       const jwt = await webauthnAuthenticate(opts?.mode);
       await signInWithToken(jwt);
     } catch (err) {
       console.error('authenticateCredential failed', err);
-      
+
       // Silently handle expected errors when silent mode is enabled
-      if (opts?.silent && (err instanceof Error)) {
+      if (opts?.silent && err instanceof Error) {
         const errorName = err.name;
         if (errorName === 'NotAllowedError' || errorName === 'AbortError') {
           return;
         }
       }
-      
+
       showError((err as Error)?.message ?? 'Authentication failed');
       throw err;
     }
@@ -170,15 +175,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider
-        value={{
-          user,
-          profile,
-          isAuthenticated: !!user,
-          isLoading: loading,
-          registerCredential,
-          authenticateCredential,
-          logout,
-        }}
+      value={{
+        user,
+        profile,
+        isAuthenticated: !!user,
+        isLoading: loading,
+        registerCredential,
+        authenticateCredential,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>

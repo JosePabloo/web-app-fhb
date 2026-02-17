@@ -2,7 +2,7 @@
 // PURPOSE: Handles WebAuthn credential registration and authentication to obtain JWT and enter protected area.
 // NOTES: Invokes useAuth WebAuthn actions and navigates to /dashboard; complements OTP login alternative in public flow.
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Box, Card, CardContent, TextField, Button, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../../../../app/layouts/PageWrapper';
@@ -14,8 +14,8 @@ import { useAutoPasskeyLaunch } from '../../hooks/useAutoPasskeyLaunch';
 export default function LoginWithWebAuthn() {
   const navigate = useNavigate();
   const { showLoading, hideLoading } = useLoading();
-  const { showError } = useSnackbar()
-// Form state: 
+  const { showError } = useSnackbar();
+  // Form state:
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -30,7 +30,7 @@ export default function LoginWithWebAuthn() {
       if (!phoneNumber) throw new Error('Enter a Phone Number to register');
       if (!email) throw new Error('Enter an email to register');
 
-      await registerCredential(username, phoneNumber, email);
+      await registerCredential({ username, email, phoneNumber });
       navigate('/dashboard');
     } catch (err) {
       showError((err as Error).message);
@@ -53,7 +53,9 @@ export default function LoginWithWebAuthn() {
 
   return (
     <PageWrapper>
-      <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Box
+        sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
         <Box sx={{ maxWidth: 900, width: '100%' }}>
           <Box sx={{ mb: 4 }}>
             <Typography variant="h2" fontWeight={700} gutterBottom>
@@ -71,14 +73,14 @@ export default function LoginWithWebAuthn() {
                   fullWidth
                   label="Name"
                   value={username}
-                  onChange={e => setUsername(e.target.value)}
+                  onChange={(e) => setUsername(e.target.value)}
                   margin="normal"
                 />
                 <TextField
                   fullWidth
                   label="Phone Number"
                   value={phoneNumber}
-                  onChange={e => setPhoneNumber(e.target.value)}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
                   margin="normal"
                 />
                 <TextField
@@ -86,23 +88,13 @@ export default function LoginWithWebAuthn() {
                   label="Email Address"
                   type="email"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   margin="normal"
                 />
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  sx={{ mt: 1 }}
-                  onClick={handleRegister}
-                >
+                <Button fullWidth variant="outlined" sx={{ mt: 1 }} onClick={handleRegister}>
                   Register Security Key
                 </Button>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  sx={{ mt: 1 }}
-                  onClick={handleAuthenticate}
-                >
+                <Button fullWidth variant="contained" sx={{ mt: 1 }} onClick={handleAuthenticate}>
                   Login with Security Key
                 </Button>
               </CardContent>
