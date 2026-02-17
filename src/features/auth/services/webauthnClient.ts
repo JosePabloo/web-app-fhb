@@ -4,6 +4,7 @@
 
 import { client as webauthnClient } from '@passwordless-id/webauthn';
 import { casaNorteAuthApi } from '../../../shared/services/apiClient';
+import { config } from '../../../shared/config/env';
 import type { ApiResponse } from '../../auth/services/userService';
 import type {
   StartRegistrationData,
@@ -12,7 +13,7 @@ import type {
   PublicKeyCredentialRequestOptionsJSON,
 } from '../types/auth';
 
-const application = 'CASA_NORTE_DEV';
+const application = config.application as string;
 
 function getCurrentRpId(): string | null {
   if (typeof window === 'undefined') return null;
