@@ -12,21 +12,16 @@ import { useSnackbar } from '../../../../core/notifications/useSnackbar';
 import { useAutoPasskeyLaunch } from '../../hooks/useAutoPasskeyLaunch';
 
 export default function LoginWithWebAuthn() {
-  const { registerCredential, authenticateCredential } = useAuth();
-  const { showError } = useSnackbar();
+  const navigate = useNavigate();
   const { showLoading, hideLoading } = useLoading();
+  const { showError } = useSnackbar()
+// Form state: 
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
-  const navigate = useNavigate();
-
+  const { registerCredential, authenticateCredential } = useAuth();
   // Enable automatic passkey launch when this component mounts
   useAutoPasskeyLaunch(true);
-
-  useEffect(() => {
-    // Ensure Recaptcha is initialized if using OTP
-    // (existing recaptcha setup in AuthContext)
-  }, []);
 
   const handleRegister = async () => {
     showLoading();
