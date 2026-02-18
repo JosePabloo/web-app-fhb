@@ -12,6 +12,9 @@ const Dashboard = lazy(() => import('../../features/dashboard/routes/Dashboard')
 const AccountSettings = lazy(() => import('../../features/settings/routes/AccountSettings'));
 const NotFound = lazy(() => import('../../features/app/routes/NotFound'));
 const UnderConstruction = lazy(() => import('../../features/app/routes/UnderConstruction'));
+const InviteCreate = lazy(() => import('../../features/invites/routes/InviteCreate'));
+const InviteLanding = lazy(() => import('../../features/invites/routes/InviteLanding'));
+const InviteAccept = lazy(() => import('../../features/invites/routes/InviteAccept'));
 
 const isUnderConstruction = config.featureFlags?.underConstruction ?? false;
 
@@ -23,6 +26,8 @@ const baseRoutes = [
     children: [
       { path: '/', element: <RootRoute /> },
       { path: '/login', element: <LoginWithWebAuthn /> },
+      { path: '/invite', element: <InviteLanding /> },
+      { path: '/invite/continue', element: <InviteAccept /> },
     ],
   },
   {
@@ -30,6 +35,7 @@ const baseRoutes = [
     children: [
       { path: '/dashboard', element: <Dashboard /> },
       { path: '/settings', element: <AccountSettings /> },
+      { path: '/settings/invite', element: <InviteCreate /> },
     ],
   },
   {
