@@ -12,25 +12,26 @@ export interface InviteCreatePayload {
   phoneNumber: string;
 }
 
-export interface InviteCreateResponse {
+export interface InviteResponse {
   inviteId: string;
   status?: string;
   expiresAt?: number;
   inviteLink?: string;
   shortCode?: string | null;
-}
-
-export interface InviteLookupResponse {
-  inviteId: string;
-  maskedEmail?: string;
   firstName?: string;
   lastName?: string;
+  email?: string;
+  phoneNumber?: string;
+  roles?: InviteRole[];
+}
+
+export type InviteCreateResponse = InviteResponse;
+export type InviteLookupResponse = InviteResponse & {
+  maskedEmail?: string;
   maskedPhoneNumber?: string;
   tenantId?: string;
   tenantName?: string;
-  status?: string;
-  expiresAt?: number;
-}
+};
 
 export interface PhoneValidationRequest {
   last4Digits: string;

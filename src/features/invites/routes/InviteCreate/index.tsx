@@ -1,66 +1,27 @@
 // FILE: src/features/invites/routes/InviteCreate/index.tsx
 // PURPOSE: Authenticated screen for creating team invites and sharing invite links.
-// NOTES: Uses InviteForm and native share/clipboard fallbacks to distribute invite URL.
+// NOTES: Uses InviteForm and navigates to InviteDetails after successful creation.
 
-import { useCallback, useMemo, useState } from 'react';
-import {
-  Box,
-  Button,
-  Stack,
-  TextField,
-  Typography,
-  Paper,
-} from '@mui/material';
+import { useCallback, useMemo } from 'react';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import InviteForm, { type InviteFormValues } from '../../components/InviteForm';
 import { createInvite } from '../../services/inviteService';
 import { formatPhoneNumber } from '../../../../shared/utils/phone';
 import { useLoading } from '../../../../core/loading/useLoading';
 import { useSnackbar } from '../../../../core/notifications/useSnackbar';
-
-function buildInviteUrl(inviteId: string): string {
-  if (typeof window === 'undefined') return `/invite?i=${inviteId}`;
-  return `${window.location.origin}/invite?i=${inviteId}`;
-}
+import { useInvite } from '../../../../core/invites/useInvite';
+import type { InviteResponse } from '../../types';
 
 export default function InviteCreate() {
   const navigate = useNavigate();
   const { showLoading, hideLoading } = useLoading();
   const { showError } = useSnackbar();
-  const [lastInviteUrl, setLastInviteUrl] = useState<string>('');
-  const [lastInviteEmail, setLastInviteEmail] = useState<string>('');
+  const { setCurrentInvite } = useInvite();
 
   const handleCancel = useCallback(() => {
     navigate('/settings');
   }, [navigate]);
-
-  const handleShare = useCallback(
-    async (inviteUrl: string, email?: string) => {
-      const shareText = email ? `Invite for ${email}` : 'Invite for your teammate';
-      try {
-        if (navigator.share) {
-          await navigator.share({
-            title: 'Casa Norte invite',
-            text: shareText,
-            url: inviteUrl,
-          });
-          console.log('Invite shared.');
-          return;
-        }
-      } catch (err) {
-        console.warn('Native share failed, falling back to clipboard', err);
-      }
-
-      try {
-        await navigator.clipboard.writeText(inviteUrl);
-        console.log('Invite link copied to clipboard.');
-      } catch (err) {
-        console.error('Failed to copy invite link', err);
-        showError('Could not share the invite link. Please copy it manually.');
-      }
-    },
-    [showError],
-  );
 
   const handleSubmit = useCallback(
     async (values: InviteFormValues) => {
@@ -74,65 +35,26 @@ export default function InviteCreate() {
           ...values,
           phoneNumber: normalizedPhone,
         });
-        const inviteUrl = response.inviteLink ?? buildInviteUrl(response.inviteId);
-        setLastInviteUrl(inviteUrl);
-        setLastInviteEmail(values.email ?? '');
-        // Remove auto-share - user will click Share link button manually
+
+        const inviteData: InviteResponse = {
+          ...response,
+          firstName: values.firstName,
+          lastName: values.lastName,
+          email: values.email,
+          phoneNumber: values.phoneNumber,
+          roles: values.roles,
+        };
+
+        setCurrentInvite(inviteData);
+        navigate(`/settings/invite/${response.inviteId}`);
       } catch (err) {
         showError((err as Error)?.message ?? 'Failed to create invite');
       } finally {
         hideLoading();
       }
     },
-    [hideLoading, showError, showLoading],
+    [hideLoading, navigate, setCurrentInvite, showError, showLoading],
   );
-
-  const handleShareClick = useCallback(async () => {
-    if (!lastInviteUrl) return;
-    await handleShare(lastInviteUrl, lastInviteEmail);
-  }, [handleShare, lastInviteEmail, lastInviteUrl]);
-
-  const handleCopyClick = useCallback(async () => {
-    if (!lastInviteUrl) return;
-    try {
-      await navigator.clipboard.writeText(lastInviteUrl);
-      console.log('Invite link copied to clipboard.');
-    } catch {
-      showError('Could not copy the invite link.');
-    }
-  }, [lastInviteUrl, showError]);
-
-  const shareSummary = useMemo(() => {
-    if (!lastInviteUrl) return null;
-    return (
-      <Paper variant="outlined" sx={{ p: 2.5 }}>
-        <Stack spacing={2}>
-          <Stack spacing={0.4}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Invite ready to share
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Send this link to {lastInviteEmail || 'your teammate'}.
-            </Typography>
-          </Stack>
-          <TextField
-            label="Invite link"
-            value={lastInviteUrl}
-            fullWidth
-            InputProps={{ readOnly: true }}
-          />
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-            <Button variant="contained" onClick={handleShareClick}>
-              Share link
-            </Button>
-            <Button variant="outlined" onClick={handleCopyClick}>
-              Copy link
-            </Button>
-          </Stack>
-        </Stack>
-      </Paper>
-    );
-  }, [handleCopyClick, handleShareClick, lastInviteEmail, lastInviteUrl]);
 
   return (
     <Box
@@ -154,7 +76,11 @@ export default function InviteCreate() {
         sx={{ mb: 2, flexShrink: 0 }}
       >
         <Stack spacing={0.5}>
-          <Typography variant="overline" sx={{ letterSpacing: 0.08, textTransform: 'uppercase' }} color="text.secondary">
+          <Typography
+            variant="overline"
+            sx={{ letterSpacing: 0.08, textTransform: 'uppercase' }}
+            color="text.secondary"
+          >
             Settings
           </Typography>
           <Typography variant="h4" sx={{ fontSize: { xs: 24, md: 30 }, fontWeight: 700 }}>
@@ -176,20 +102,21 @@ export default function InviteCreate() {
         </Button>
       </Stack>
 
-      <Stack spacing={3} sx={{ flexGrow: 1 }}>
+      <Stack spacing={3} sx={{ flexGrow: 1, maxWidth: 600 }}>
         <InviteForm
-          defaultValues={useMemo(() => ({
-            email: '',
-            roles: ['team_member'],
-            firstName: '',
-            lastName: '',
-            phoneNumber: '',
-          }), [])}
+          defaultValues={useMemo(
+            () => ({
+              email: '',
+              roles: ['team_member'],
+              firstName: '',
+              lastName: '',
+              phoneNumber: '',
+            }),
+            [],
+          )}
           onSubmit={handleSubmit}
           onCancel={handleCancel}
         />
-
-        {shareSummary}
       </Stack>
     </Box>
   );

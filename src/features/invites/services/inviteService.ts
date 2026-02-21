@@ -5,7 +5,7 @@
 import { authApi } from '../../../shared/services/apiClient';
 import type {
   InviteCreatePayload,
-  InviteCreateResponse,
+  InviteResponse,
   InviteLookupResponse,
   PhoneValidationResponse,
 } from '../types';
@@ -15,8 +15,13 @@ interface ApiResponse<T> {
   message?: string;
 }
 
-export async function createInvite(payload: InviteCreatePayload): Promise<InviteCreateResponse> {
-  const response = await authApi.post<ApiResponse<InviteCreateResponse>>('/v1/invites', payload);
+export async function createInvite(payload: InviteCreatePayload): Promise<InviteResponse> {
+  const response = await authApi.post<ApiResponse<InviteResponse>>('/v1/invites', payload);
+  return response.data.data;
+}
+
+export async function getInviteById(inviteId: string): Promise<InviteResponse> {
+  const response = await authApi.get<ApiResponse<InviteResponse>>(`/v1/invites/${inviteId}`);
   return response.data.data;
 }
 

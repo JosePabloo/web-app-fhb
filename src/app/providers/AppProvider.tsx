@@ -11,6 +11,7 @@ import AppRouter from '../router';
 import { AuthProvider } from '../../core/auth/AuthProvider';
 import { LoadingProvider } from '../../core/loading/LoadingProvider';
 import { SnackbarProvider } from '../../core/notifications/SnackbarProvider';
+import { InviteProvider } from '../../core/invites/InviteProvider';
 import LoadingOverlay from '../../shared/components/layout/LoadingOverlay';
 import { ModalHostProvider } from '../../core/ui/ModalHostProvider';
 import OnboardingGate from '../../features/onboarding/components/OnboardingGate';
@@ -28,7 +29,7 @@ export function AppProvider() {
         shape: baseTheme.shape,
         components: baseTheme.components,
       }),
-    [mode]
+    [mode],
   );
 
   const toggleTheme = () => setMode((prev) => (prev === 'light' ? 'dark' : 'light'));
@@ -41,11 +42,13 @@ export function AppProvider() {
           <BrowserRouter>
             <ModalHostProvider>
               <AuthProvider>
-                <LoadingProvider>
-                  <AppRouter />
-                  <OnboardingGate />
-                  <LoadingOverlay />
-                </LoadingProvider>
+                <InviteProvider>
+                  <LoadingProvider>
+                    <AppRouter />
+                    <OnboardingGate />
+                    <LoadingOverlay />
+                  </LoadingProvider>
+                </InviteProvider>
               </AuthProvider>
             </ModalHostProvider>
           </BrowserRouter>

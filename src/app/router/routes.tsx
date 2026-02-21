@@ -14,6 +14,7 @@ const AccountSettings = lazy(() => import('../../features/settings/routes/Accoun
 const NotFound = lazy(() => import('../../features/app/routes/NotFound'));
 const UnderConstruction = lazy(() => import('../../features/app/routes/UnderConstruction'));
 const InviteCreate = lazy(() => import('../../features/invites/routes/InviteCreate'));
+const InviteDetails = lazy(() => import('../../features/invites/routes/InviteDetails'));
 const InviteLanding = lazy(() => import('../../features/invites/routes/InviteLanding'));
 const InviteAccept = lazy(() => import('../../features/invites/routes/InviteAccept'));
 
@@ -38,6 +39,7 @@ const baseRoutes = [
       { path: '/dashboard', element: <Dashboard /> },
       { path: '/settings', element: <AccountSettings /> },
       { path: '/settings/invite', element: <InviteCreate /> },
+      { path: '/settings/invite/:inviteId', element: <InviteDetails /> },
     ],
   },
   {
