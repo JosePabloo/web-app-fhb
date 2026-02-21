@@ -2,7 +2,7 @@
 // PURPOSE: Fetches landing-page image assets from the API so visuals can be state-driven instead of hard-coded.
 // NOTES: Returns partial payloads; callers should always merge with local fallback images.
 
-import { apiClient } from '../../../../shared/services/apiClient';
+import { spreadSyncApi } from '../../../../shared/services/apiClient';
 import type { LandingImagePayload, ProjectId } from './landing.data';
 
 type LandingImageApiResponse = {
@@ -17,7 +17,7 @@ type LandingImageApiResponse = {
 const LANDING_IMAGE_ENDPOINT = '/public/landing/images';
 
 export async function fetchLandingImages(signal?: AbortSignal): Promise<LandingImagePayload> {
-  const { data } = await apiClient.get<LandingImageApiResponse>(LANDING_IMAGE_ENDPOINT, {
+  const { data } = await spreadSyncApi.get<LandingImageApiResponse>(LANDING_IMAGE_ENDPOINT, {
     signal,
   });
 

@@ -1,6 +1,6 @@
 import type { HydrateResponseDTO } from '../types/hydrate';
 import type { UserResponseDTO } from '../../../types/user';
-import { casaNorteSpreadSyncApi } from '../../../shared/services/apiClient';
+import { spreadSyncApi } from '../../../shared/services/apiClient';
 
 export interface ApiResponse<T> {
   data: T;
@@ -15,13 +15,13 @@ export interface CompleteHydrationPayload {
 }
 
 export async function fetchUsers(): Promise<UserResponseDTO[]> {
-  const { data } = await casaNorteSpreadSyncApi.get<UserResponseDTO[]>('/users');
+  const { data } = await spreadSyncApi.get<UserResponseDTO[]>('/users');
   return data;
 }
 
 export async function hydrateInitialState(token?: string): Promise<HydrateResponseDTO | null> {
   const config = token ? { headers: { Authorization: `Bearer ${token}` } } : undefined;
-  const response = await casaNorteSpreadSyncApi.get<ApiResponse<HydrateResponseDTO>>(
+  const response = await spreadSyncApi.get<ApiResponse<HydrateResponseDTO>>(
     '/casa-norte/hydrate',
     config,
   );
@@ -31,7 +31,7 @@ export async function hydrateInitialState(token?: string): Promise<HydrateRespon
 
 export async function completeHydration(
   payload: CompleteHydrationPayload,
-  token?: string
+  token?: string,
 ): Promise<HydrateResponseDTO | null> {
   const config = token
     ? {
@@ -61,10 +61,10 @@ export async function completeHydration(
     body.append('photo', payload.photoFile);
   }
 
-  const response = await casaNorteSpreadSyncApi.put<ApiResponse<HydrateResponseDTO>>(
+  const response = await spreadSyncApi.put<ApiResponse<HydrateResponseDTO>>(
     '/casa-norte/hydrate',
     body,
-    config
+    config,
   );
 
   return response.data.data ?? null;
