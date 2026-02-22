@@ -63,9 +63,17 @@ export async function register({
   );
   const { id: provisionalId, options } = regRes.data.data;
 
+  if (!options.user?.id || !options.user?.displayName) {
+    throw new Error('Invalid registration options: missing user id or displayName');
+  }
+
   const registrationPayload = await webauthnClient.register({
     challenge: options.challenge,
-    user: options.user,
+    user: {
+      id: options.user.id,
+      name: options.user.displayName,
+      displayName: options.user.displayName,
+    },
     domain: getCurrentRpId() ?? options.rp.id,
     timeout: options.timeout,
     userVerification: options.authenticatorSelection?.userVerification,
