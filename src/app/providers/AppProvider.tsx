@@ -16,7 +16,7 @@ import LoadingOverlay from '../../shared/components/layout/LoadingOverlay';
 import { ModalHostProvider } from '../../core/ui/ModalHostProvider';
 import OnboardingGate from '../../features/onboarding/components/OnboardingGate';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ThemeModeProvider } from './ThemeModeProvider';
 
 export function AppProvider() {
@@ -32,10 +32,12 @@ export function AppProvider() {
     [mode],
   );
 
-  const toggleTheme = () => setMode((prev) => (prev === 'light' ? 'dark' : 'light'));
+  const toggleTheme = useCallback(() => setMode((prev) => (prev === 'light' ? 'dark' : 'light')), []);
+
+  const themeModeValue = useMemo(() => ({ mode, toggle: toggleTheme }), [mode, toggleTheme]);
 
   return (
-    <ThemeModeProvider value={{ mode, toggle: toggleTheme }}>
+    <ThemeModeProvider value={themeModeValue}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <SnackbarProvider>

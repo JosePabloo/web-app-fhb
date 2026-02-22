@@ -2,7 +2,15 @@
 // PURPOSE: Collapsible navigation drawer for authenticated layout exposing route links and logout action.
 // NOTES: Width constants (DRAWER_WIDTH/MINI_DRAWER_WIDTH) inform AuthLayout sizing; integrates with useAuth for logout.
 import React from 'react';
-import { Settings, Menu, ChevronLeft, Dashboard as DashboardIcon, DarkMode, LightMode, GroupAdd } from '@mui/icons-material';
+import {
+  Settings,
+  Menu,
+  ChevronLeft,
+  Dashboard as DashboardIcon,
+  DarkMode,
+  LightMode,
+  GroupAdd,
+} from '@mui/icons-material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import {
   Drawer,
@@ -29,8 +37,8 @@ interface SidebarProps {
 // eslint-disable-next-line react-refresh/only-export-components
 export const defaultNavItems = [
   { label: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
+  { label: 'Invites', icon: <GroupAdd />, path: '/invites' },
   { label: 'Settings', icon: <Settings />, path: '/settings' },
-  { label: 'Invites', icon: <GroupAdd />, path: '/settings/invite' },
 ] as const;
 
 export default function Sidebar({ open, onToggle, items = [...defaultNavItems] }: SidebarProps) {

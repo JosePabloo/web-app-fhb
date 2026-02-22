@@ -110,7 +110,7 @@ export default function InviteDetails() {
 
   const handleCreateAnother = useCallback(() => {
     setCurrentInvite(null);
-    navigate('/settings/invite');
+    navigate('/invites/invite');
   }, [navigate, setCurrentInvite]);
 
   if (isLoading) {
@@ -151,7 +151,7 @@ export default function InviteDetails() {
           <Typography variant="body2" color="text.secondary">
             The invite you're looking for doesn't exist or has expired.
           </Typography>
-          <Button component={RouterLink} to="/settings/invite" variant="contained">
+          <Button component={RouterLink} to="/invites/invite" variant="contained">
             Create an invite
           </Button>
         </Stack>
@@ -200,12 +200,12 @@ export default function InviteDetails() {
 
         <Button
           component={RouterLink}
-          to="/settings"
+          to="/invites"
           size="small"
           variant="text"
           sx={{ alignSelf: { xs: 'flex-start', md: 'center' } }}
         >
-          Back to settings
+          Back to invites
         </Button>
       </Stack>
 

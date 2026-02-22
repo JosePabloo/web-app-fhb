@@ -1,4 +1,4 @@
-// FILE: src/features/app/routes/Root/index.test.tsx
+// FILE: src/features/app/routes/Root/test/index.test.tsx
 // PURPOSE: Verify the root route redirects authenticated users and renders the public landing when unauthenticated.
 // NOTES: Mocks useAuth to control authentication state; uses MemoryRouter for route assertions.
 
@@ -10,7 +10,7 @@ import RootRoute from '../index';
 
 const mockAuthState = { isAuthenticated: false };
 
-vi.mock('../../../../core/auth/useAuth', () => ({
+vi.mock('../../../../../core/auth/useAuth', () => ({
   useAuth: () => mockAuthState,
 }));
 

@@ -20,7 +20,7 @@ export default function InviteCreate() {
   const { setCurrentInvite } = useInvite();
 
   const handleCancel = useCallback(() => {
-    navigate('/settings');
+    navigate('/invites');
   }, [navigate]);
 
   const handleSubmit = useCallback(
@@ -46,7 +46,7 @@ export default function InviteCreate() {
         };
 
         setCurrentInvite(inviteData);
-        navigate(`/settings/invite/${response.inviteId}`);
+        navigate(`/invites/${response.inviteId}`);
       } catch (err) {
         showError((err as Error)?.message ?? 'Failed to create invite');
       } finally {

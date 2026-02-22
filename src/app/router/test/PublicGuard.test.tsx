@@ -1,4 +1,4 @@
-// FILE: src/app/router/PublicGuard.test.tsx
+// FILE: src/app/router/test/PublicGuard.test.tsx
 // PURPOSE: Ensure authenticated users hitting public routes are redirected to dashboard and unauthenticated users see public layout.
 // NOTES: Mocks useAuth to control auth state; uses MemoryRouter for routing.
 
@@ -8,19 +8,20 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
 import PublicGuard from '../PublicGuard';
 
+const mockAuthState = { isAuthenticated: false };
 
-vi.mock('../../core/auth/useAuth', () => ({
-  useAuth: () => ({ isAuthenticated: (vi as unknown as { mockedAuthState: boolean }).mockedAuthState }),
+vi.mock('../../../core/auth/useAuth', () => ({
+  useAuth: () => mockAuthState,
 }));
 
-vi.mock('../layouts/PublicLayout', () => ({
+vi.mock('../../layouts/PublicLayout', () => ({
   __esModule: true,
   default: () => <div>Public Layout</div>,
 }));
 
 describe('PublicGuard', () => {
   it('redirects authenticated users to /dashboard', () => {
-    (vi as unknown as { mockedAuthState: boolean }).mockedAuthState = true;
+    mockAuthState.isAuthenticated = true;
 
     render(
       <MemoryRouter initialEntries={['/login']}>
@@ -35,7 +36,7 @@ describe('PublicGuard', () => {
   });
 
   it('renders public layout for unauthenticated users', () => {
-    (vi as unknown as { mockedAuthState: boolean }).mockedAuthState = false;
+    mockAuthState.isAuthenticated = false;
 
     render(
       <MemoryRouter initialEntries={['/login']}>

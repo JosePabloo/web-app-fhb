@@ -32,6 +32,11 @@ export async function getInvite(inviteId: string): Promise<InviteLookupResponse>
   return response.data.data;
 }
 
+export async function getAllInvites(): Promise<InviteResponse[]> {
+  const response = await authApi.get<ApiResponse<InviteResponse[]>>('/v1/invites');
+  return response.data.data;
+}
+
 export async function validatePhone(
   inviteId: string,
   last4Digits: string,

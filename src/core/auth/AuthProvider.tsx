@@ -2,7 +2,7 @@
 // PURPOSE: Provides global authentication context integrating Firebase, WebAuthn, and profile hydration.
 // NOTES: Handles persistence and hydration cooldown; exposes auth actions (WebAuthn, logout) consumed via useAuth inside AppProvider.
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { User } from 'firebase/auth';
 import { onAuthStateChanged, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { auth } from '../../firebase/config';
@@ -105,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [resetSession, showError]);
 
-  const registerCredential = async (params: RegisterCredentialParams): Promise<void> => {
+  const registerCredential = useCallback(async (params: RegisterCredentialParams): Promise<void> => {
     try {
       const jwt = await webauthnRegister(params);
       await signInWithToken(jwt);
@@ -114,9 +114,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       showError((error as Error)?.message ?? 'Failed to register credential');
       throw error;
     }
-  };
+  }, [showError]);
 
-  const authenticateCredential = async (opts?: {
+  const authenticateCredential = useCallback(async (opts?: {
     silent?: boolean;
     mode?: 'default' | 'conditional';
   }): Promise<void> => {
@@ -138,9 +138,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       showError((err as Error)?.message ?? 'Authentication failed');
       throw err;
     }
-  };
+  }, [showError]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await serviceSignOut();
       // ensure local auth state is cleared so UI updates immediately
@@ -154,7 +154,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       showError('Failed to logout');
       throw err;
     }
-  };
+  }, [navigate, resetSession, showError]);
+
+  const value = useMemo(() => ({
+    user,
+    profile,
+    isAuthenticated: !!user,
+    isLoading: loading,
+    registerCredential,
+    authenticateCredential,
+    logout,
+  }), [user, profile, loading, registerCredential, authenticateCredential, logout]);
 
   if (loading) {
     return (
@@ -174,17 +184,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        profile,
-        isAuthenticated: !!user,
-        isLoading: loading,
-        registerCredential,
-        authenticateCredential,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
