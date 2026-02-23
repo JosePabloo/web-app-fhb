@@ -20,7 +20,7 @@ export default function Dashboard() {
         <Typography variant="h4">{displayName}</Typography>
       </Grid>
       <Grid size={{ xs: 12, lg: 4 }}>
-        <DomainStatusCard displayUrl="https://www.google.com" />
+        <DomainStatusCard displayUrl="https://www.frosthavenbuilders.com" />
       </Grid>
     </Grid>
   );
