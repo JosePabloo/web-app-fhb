@@ -34,7 +34,7 @@ export async function getInvite(inviteId: string): Promise<InviteLookupResponse>
 
 export async function getAllInvites(): Promise<InviteResponse[]> {
   const response = await authApi.get<ApiResponse<InviteResponse[]>>('/v1/invites');
-  return response.data.data;
+  return response.data.data ?? [];
 }
 
 export async function validatePhone(
