@@ -24,6 +24,10 @@ function getCurrentRpId(): string | null {
   }
 }
 
+function normalizeUserVerification(v?: string): 'preferred' | 'required' | 'discouraged' | undefined {
+  return v?.toLowerCase() as 'preferred' | 'required' | 'discouraged' | undefined;
+}
+
 export interface RegisterParams {
   username: string;
   email: string;
@@ -76,7 +80,7 @@ export async function register({
     },
     domain: getCurrentRpId() ?? options.rp.id,
     timeout: options.timeout,
-    userVerification: options.authenticatorSelection?.userVerification,
+    userVerification: normalizeUserVerification(options.authenticatorSelection?.userVerification),
     discoverable: options.authenticatorSelection?.requireResidentKey ? 'required' : 'preferred',
     attestation: options.attestation === 'direct',
   });
@@ -144,7 +148,7 @@ export async function authenticate(mode: 'default' | 'conditional' = 'default'):
         id: c.id,
         transports: c.transports!,
       })),
-    userVerification: opts.authenticatorSelection?.userVerification,
+    userVerification: normalizeUserVerification(opts.userVerification ?? opts.authenticatorSelection?.userVerification),
   };
 
   // Add conditional mediation if supported and requested
