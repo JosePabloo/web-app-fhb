@@ -4,6 +4,7 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { ModalHostContext, type ModalDescriptor } from './ModalHostContext';
+export { useModalHost } from './useModalHost';
 
 export function ModalHostProvider({ children }: { children: React.ReactNode }) {
   const dismissedIds = useRef<Set<string>>(new Set());

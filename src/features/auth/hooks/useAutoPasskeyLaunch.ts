@@ -17,11 +17,7 @@ export function useAutoPasskeyLaunch(enabled: boolean = true): void {
     }
 
     // Check browser support
-    if (
-      typeof window === 'undefined' ||
-      !window.isSecureContext ||
-      !window.PublicKeyCredential
-    ) {
+    if (typeof window === 'undefined' || !window.isSecureContext || !window.PublicKeyCredential) {
       return;
     }
 
@@ -34,9 +30,9 @@ export function useAutoPasskeyLaunch(enabled: boolean = true): void {
     sessionStorage.setItem(SESSION_KEY, 'true');
 
     // Check if conditional mediation is available
-    const isConditionalMediationAvailable = 
+    const isConditionalMediationAvailable =
       'isConditionalMediationAvailable' in window.PublicKeyCredential &&
-      typeof (window.PublicKeyCredential as { isConditionalMediationAvailable?: unknown }).isConditionalMediationAvailable === 'function';
+      typeof (window.PublicKeyCredential as any).isConditionalMediationAvailable === 'function';
 
     if (!isConditionalMediationAvailable) {
       return; // Conditional UI not supported, don't auto-launch
@@ -46,17 +42,17 @@ export function useAutoPasskeyLaunch(enabled: boolean = true): void {
     const attemptAutoPasskey = async () => {
       try {
         // Check if conditional mediation is actually available
-        const isAvailable = await (window.PublicKeyCredential as { isConditionalMediationAvailable: () => Promise<boolean> }).isConditionalMediationAvailable();
+        const isAvailable = await (
+          window.PublicKeyCredential as any
+        ).isConditionalMediationAvailable();
         if (!isAvailable) {
           return;
         }
 
-        
-
         // Attempt silent authentication with conditional mediation
         await authenticateCredential({
           silent: true,
-          mode: 'conditional'
+          mode: 'conditional',
         });
       } catch (error) {
         // Silent fail for auto-launch - expected errors include:

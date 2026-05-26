@@ -11,8 +11,9 @@ import type {
   FinishRegistrationResponse,
   PublicKeyCredentialRequestOptionsJSON,
 } from '../types/auth';
+import config from '../../../shared/config/env';
 
-const application = 'CASA_NORTE_DEV';
+const application = config.application;
 
 function getCurrentRpId(): string | null {
   if (typeof window === 'undefined') return null;
@@ -21,6 +22,10 @@ function getCurrentRpId(): string | null {
   } catch {
     return null;
   }
+}
+
+function normalizeUserVerification(v?: string): 'preferred' | 'required' | 'discouraged' | undefined {
+  return v?.toLowerCase() as 'preferred' | 'required' | 'discouraged' | undefined;
 }
 
 export async function register(
@@ -34,29 +39,37 @@ export async function register(
     return '';
   }
 
-  const requestBody: Record<string, string> = { username, email, application };
-  if (inviteId) {
-    requestBody.inviteId = inviteId;
-  }
-  if (phoneNumber) {
-    requestBody.phoneNumber = phoneNumber;
-  }
-  
   const regRes = await casaNorteAuthApi.post<ApiResponse<StartRegistrationData>>(
     '/casa-norte/webauthn/registrations',
-    requestBody,
+    {
+      username,
+      email,
+      phoneNumber: phoneNumber || null,
+      application,
+      ...(inviteId ? { inviteId } : {}),
+    },
   );
   const { id: provisionalId, options } = regRes.data.data;
 
-  const registrationPayload = await webauthnClient.register({
+  if (!options.user?.id || !options.user?.displayName) {
+    throw new Error('Invalid registration options: missing user id or displayName');
+  }
+
+  const pk: any = {
     challenge: options.challenge,
-    user: options.user,
+    user: {
+      id: options.user.id,
+      name: options.user.displayName || '',
+      displayName: options.user.displayName || '',
+    },
     domain: getCurrentRpId() ?? options.rp.id,
     timeout: options.timeout,
-    userVerification: options.authenticatorSelection?.userVerification,
+    userVerification: normalizeUserVerification(options.authenticatorSelection?.userVerification),
     discoverable: options.authenticatorSelection?.requireResidentKey ? 'required' : 'preferred',
     attestation: options.attestation === 'direct',
-  });
+  };
+
+  const registrationPayload = await webauthnClient.register(pk);
 
   const { id, rawId, type, response } = registrationPayload;
   const body = {
@@ -88,7 +101,7 @@ function isConditionalMediationAvailable(): boolean {
     typeof window !== 'undefined' &&
     window.PublicKeyCredential &&
     'isConditionalMediationAvailable' in window.PublicKeyCredential &&
-    typeof (window.PublicKeyCredential as { isConditionalMediationAvailable?: unknown }).isConditionalMediationAvailable === 'function'
+    typeof (window.PublicKeyCredential as any).isConditionalMediationAvailable === 'function'
   );
 }
 
@@ -106,10 +119,10 @@ export async function authenticate(mode: 'default' | 'conditional' = 'default'):
   const { id: provisionalId, options } = authRes.data.data;
   const opts = options as PublicKeyCredentialRequestOptionsJSON;
 
-  const rpIdFromServer = typeof opts.rpId === 'string' ? opts.rpId : (opts.rpId as { id?: string }).id ?? '';
+  const rpIdFromServer = typeof opts.rpId === 'string' ? opts.rpId : (opts.rpId as any);
   const domain = getCurrentRpId() ?? rpIdFromServer;
 
-  const authOptions = {
+  const authOptions: any = {
     challenge: opts.challenge,
     domain,
     timeout: opts.timeout,
@@ -117,17 +130,19 @@ export async function authenticate(mode: 'default' | 'conditional' = 'default'):
       ?.filter((c) => !!c.transports)
       .map((c) => ({
         id: c.id,
-        transports: c.transports!,
+        transports: c.transports,
       })),
-    userVerification: opts.authenticatorSelection?.userVerification,
+    userVerification: normalizeUserVerification(opts.userVerification ?? opts.authenticatorSelection?.userVerification),
   };
 
   // Add conditional mediation if supported and requested
   if (mode === 'conditional' && isConditionalMediationAvailable()) {
     try {
-      const isAvailable = await (window.PublicKeyCredential as { isConditionalMediationAvailable: () => Promise<boolean> }).isConditionalMediationAvailable();
+      const isAvailable = await (
+        window.PublicKeyCredential as any
+      ).isConditionalMediationAvailable();
       if (isAvailable) {
-        (authOptions as { mediation?: string }).mediation = 'conditional';
+        authOptions.mediation = 'conditional';
       }
     } catch {
       // Fall back to default if conditional check fails

@@ -31,12 +31,13 @@ export async function hydrateInitialState(token?: string): Promise<HydrateRespon
 
 export async function completeHydration(
   payload: CompleteHydrationPayload,
-  token?: string
+  token?: string,
 ): Promise<HydrateResponseDTO | null> {
   const config = token
     ? {
         headers: {
           Authorization: `Bearer ${token}`,
+          // Let axios set proper multipart boundaries when using FormData
           ...(payload.photoFile ? { 'Content-Type': 'multipart/form-data' } : {}),
         },
       }
@@ -49,8 +50,8 @@ export async function completeHydration(
     if (!value) return;
     if (shouldUseFormData && body instanceof FormData) {
       body.append(key, value);
-    } else {
-      (body as Record<string, unknown>)[key] = value;
+    } else if (!shouldUseFormData && !(body instanceof FormData)) {
+      body[key] = value;
     }
   };
 
@@ -64,7 +65,7 @@ export async function completeHydration(
   const response = await casaNorteSpreadSyncApi.put<ApiResponse<HydrateResponseDTO>>(
     '/casa-norte/hydrate',
     body,
-    config
+    config,
   );
 
   return response.data.data ?? null;

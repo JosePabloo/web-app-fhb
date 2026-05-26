@@ -13,6 +13,35 @@ export interface UserPreferencesDTO {
   dashboardLayout?: string;
 }
 
+export interface DashboardKPIs {
+  todaysJobs: number;
+  completedJobs: number;
+  inProgressJobs: number;
+  scheduledJobs: number;
+  readyToSchedule: number;
+  openEstimates: number;
+}
+
+export interface AttentionItem {
+  id: string;
+  type: 'estimate' | 'job' | 'payment';
+  title: string;
+  description: string;
+}
+
+export interface ActivityItem {
+  id: string;
+  type: 'estimate' | 'job' | 'payment';
+  title: string;
+  timestamp: number;
+}
+
+export interface DashboardData {
+  kpis: DashboardKPIs;
+  attentionItems: AttentionItem[];
+  recentActivity: ActivityItem[];
+}
+
 export interface HydrateResponseDTO {
   id: string;
   tenantId: string;
@@ -28,6 +57,7 @@ export interface HydrateResponseDTO {
   featureFlags: Record<string, boolean>;
   tenantSettings: TenantSettingsDTO;
   preferences: UserPreferencesDTO;
+  dashboard?: DashboardData;
 }
 
 export interface UserResponseDTO {
