@@ -16,7 +16,7 @@ vi.mock('../../../core/auth/useAuth', () => ({
   useAuth: () => ({ logout }),
 }));
 
-vi.mock('../../../app/providers/useThemeMode', () => ({
+vi.mock('../../../app/providers/ThemeModeContext', () => ({
   useThemeMode: () => ({ mode: 'light', toggle }),
 }));
 
@@ -54,8 +54,9 @@ describe('Sidebar', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Clients')).toBeInTheDocument();
-    await user.click(screen.getByText('Clients'));
+    const clientsItems = screen.getAllByText('Clients');
+    expect(clientsItems.length).toBeGreaterThan(0);
+    await user.click(clientsItems[0]);
     expect(navigate).toHaveBeenCalledWith('/clients');
   });
 

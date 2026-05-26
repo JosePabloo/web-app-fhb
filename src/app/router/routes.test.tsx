@@ -27,6 +27,7 @@ describe('routeConfig', () => {
 
   it('uses maintenance-only routes when under construction flag is on', async () => {
     vi.doMock('./PublicGuard', () => ({ __esModule: true, default: () => null }));
+    vi.doMock('./RequireAuth', () => ({ __esModule: true, default: () => null }));
     vi.doMock('../layouts/AuthLayout', () => ({ __esModule: true, default: () => null }));
     mockEnvModule(true);
     const { routeConfig } = await import('./routes');
@@ -37,6 +38,7 @@ describe('routeConfig', () => {
 
   it('uses base routes when under construction flag is off', async () => {
     vi.doMock('./PublicGuard', () => ({ __esModule: true, default: () => null }));
+    vi.doMock('./RequireAuth', () => ({ __esModule: true, default: () => null }));
     vi.doMock('../layouts/AuthLayout', () => ({ __esModule: true, default: () => null }));
     mockEnvModule(false);
     const { routeConfig } = await import('./routes');
