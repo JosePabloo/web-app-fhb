@@ -1,4 +1,4 @@
-// FILE: src/features/app/routes/Root/index.test.tsx
+// FILE: src/features/app/routes/Root/test/index.test.tsx
 // PURPOSE: Verify the root route redirects authenticated users and renders the public landing when unauthenticated.
 // NOTES: Mocks useAuth to control authentication state; uses MemoryRouter for route assertions.
 
@@ -6,11 +6,11 @@ import { describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
 
-import RootRoute from './index';
+import RootRoute from '../index';
 
 const mockAuthState = { isAuthenticated: false };
 
-vi.mock('../../../../core/auth/useAuth', () => ({
+vi.mock('../../../../../core/auth/useAuth', () => ({
   useAuth: () => mockAuthState,
 }));
 
@@ -41,6 +41,6 @@ describe('RootRoute', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getAllByText(/Discover the perfect interior solutions for every room/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Crafting Modern Homes That Endure\./i)).toBeInTheDocument();
   });
 });

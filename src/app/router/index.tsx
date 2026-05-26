@@ -1,6 +1,10 @@
-// FILE: src/app/router/index.tsx
-// PURPOSE: Renders the nested Routes tree from routeConfig under a Suspense boundary for lazy-loaded pages.
-// NOTES: Enables layout nesting (Public vs Auth) and handles 404 via routeConfig while deferring loading fallback control.
+/**
+ * 
+ * FILE: src/app/router/index.tsx
+ * PURPOSE: Renders the nested Routes tree from routeConfig under a Suspense boundary for lazy-loaded pages.
+ * NOTES: Enables layout nesting (Public vs Auth) and handles 404 via routeConfig while deferring loading fallback control.
+ * 
+ */
 
 import { Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';

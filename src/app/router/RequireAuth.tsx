@@ -1,6 +1,7 @@
 // FILE: src/app/router/RequireAuth.tsx
 // PURPOSE: Protects authenticated routes by ensuring valid auth before rendering private content.
 // NOTES: Wraps authenticated layout branches; redirects unauthenticated users to login.
+// SYNC REQUIRED: changes to this file require an automatic discovery for code changes at the platform, cn-shell 
 
 import { Navigate, useLocation } from 'react-router-dom';
 import AuthLayout from '../layouts/AuthLayout';

@@ -5,7 +5,7 @@
 import { signInWithCustomToken, signOut as firebaseSignOut } from 'firebase/auth';
 import type { UserCredential } from 'firebase/auth';
 import { auth } from '../../../firebase/config';
-import { apiClient } from '../../../shared/services/apiClient';
+import { spreadSyncApi } from '../../../shared/services/apiClient';
 
 // Types for phone OTP flow - matches backend ApiResponse<T> structure
 interface PhoneSendCodeResponseData {
@@ -34,7 +34,7 @@ interface ApiResponse<T> {
 export async function sendVerificationCode(
   phoneNumber: string
 ): Promise<string> {
-  const response = await apiClient.post<ApiResponse<PhoneSendCodeResponseData>>(
+  const response = await spreadSyncApi.post<ApiResponse<PhoneSendCodeResponseData>>(
     '/casa-norte/webauthn/send-code',
     { phoneNumber }
   );
@@ -55,7 +55,7 @@ export async function verifyCode(
   sessionId: string,
   code: string
 ): Promise<string> {
-  const response = await apiClient.post<ApiResponse<PhoneVerifyCodeResponseData>>(
+  const response = await spreadSyncApi.post<ApiResponse<PhoneVerifyCodeResponseData>>(
     '/casa-norte/webauthn/verify-code',
     { sessionId, code }
   );

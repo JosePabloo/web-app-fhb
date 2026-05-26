@@ -1,4 +1,4 @@
-import { casaNorteSpreadSyncApi } from '../../../shared/services/apiClient';
+import { spreadSyncApi } from '../../../shared/services/apiClient';
 import type { Client, ClientStatus, ContactMethod, LeadSource, BillingPreference } from '../types';
 
 interface ApiResponse<T> {
@@ -42,14 +42,14 @@ function mapApiUserToClient(apiUser: {
 }
 
 export async function getClients(): Promise<Client[]> {
-  const response = await casaNorteSpreadSyncApi.get<ApiResponse<Client[]>>('/casa-norte/users', {
+  const response = await spreadSyncApi.get<ApiResponse<Client[]>>('/casa-norte/users', {
     params: { role: 'TENANT_CLIENT' },
   });
   return response.data.data.map(mapApiUserToClient);
 }
 
 export async function getClient(id: string): Promise<Client> {
-  const response = await casaNorteSpreadSyncApi.get<ApiResponse<Client>>(`/casa-norte/users/${id}`);
+  const response = await spreadSyncApi.get<ApiResponse<Client>>(`/casa-norte/users/${id}`);
   return mapApiUserToClient(response.data.data);
 }
 
@@ -100,7 +100,7 @@ function toApiPayload(values: CreateClientPayload) {
 }
 
 export async function createClient(values: CreateClientPayload): Promise<Client> {
-  const response = await casaNorteSpreadSyncApi.post<ApiResponse<Client>>(
+  const response = await spreadSyncApi.post<ApiResponse<Client>>(
     '/casa-norte/users',
     toApiPayload(values),
   );

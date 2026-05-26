@@ -8,10 +8,16 @@ import config from '../../shared/config/env';
 
 const RootRoute = lazy(() => import('../../features/app/routes/Root'));
 const LoginWithWebAuthn = lazy(() => import('../../features/auth/routes/LoginWithWebAuthn'));
+const Contact = lazy(() => import('../../features/auth/routes/Contact'));
 const Dashboard = lazy(() => import('../../features/dashboard/routes/Dashboard'));
 const AccountSettings = lazy(() => import('../../features/settings/routes/AccountSettings'));
 const NotFound = lazy(() => import('../../features/app/routes/NotFound'));
 const UnderConstruction = lazy(() => import('../../features/app/routes/UnderConstruction'));
+const InviteCreate = lazy(() => import('../../features/invites/routes/InviteCreate'));
+const InviteDashboard = lazy(() => import('../../features/invites/routes/InviteDashboard'));
+const InviteDetails = lazy(() => import('../../features/invites/routes/InviteDetails'));
+const InviteLanding = lazy(() => import('../../features/invites/routes/InviteLanding'));
+const InviteAccept = lazy(() => import('../../features/invites/routes/InviteAccept'));
 
 const isUnderConstruction = config.featureFlags?.underConstruction ?? false;
 
@@ -23,12 +29,18 @@ const baseRoutes = [
     children: [
       { path: '/', element: <RootRoute /> },
       { path: '/login', element: <LoginWithWebAuthn /> },
+      { path: '/contact', element: <Contact /> },
+      { path: '/invite', element: <InviteLanding /> },
+      { path: '/invite/continue', element: <InviteAccept /> },
     ],
   },
   {
     element: <RequireAuth />,
     children: [
       { path: '/dashboard', element: <Dashboard /> },
+      { path: '/invites', element: <InviteDashboard /> },
+      { path: '/invites/:inviteId', element: <InviteDetails /> },
+      { path: '/invites/invite', element: <InviteCreate /> },
       { path: '/settings', element: <AccountSettings /> },
     ],
   },

@@ -3,7 +3,7 @@
 // NOTES: Used by AuthProvider via registerCredential/authenticateCredential; depends on @passwordless-id/webauthn client and API.
 
 import { client as webauthnClient } from '@passwordless-id/webauthn';
-import { casaNorteAuthApi } from '../../../shared/services/apiClient';
+import { authApi } from '../../../shared/services/apiClient';
 import type { ApiResponse } from '../../auth/services/userService';
 import type {
   StartRegistrationData,
@@ -39,7 +39,7 @@ export async function register(
     return '';
   }
 
-  const regRes = await casaNorteAuthApi.post<ApiResponse<StartRegistrationData>>(
+  const regRes = await authApi.post<ApiResponse<StartRegistrationData>>(
     '/casa-norte/webauthn/registrations',
     {
       username,
@@ -87,7 +87,7 @@ export async function register(
     application,
   };
 
-  const finishRes = await casaNorteAuthApi.post<ApiResponse<FinishRegistrationResponse>>(
+  const finishRes = await authApi.post<ApiResponse<FinishRegistrationResponse>>(
     `/casa-norte/webauthn/registrations/${provisionalId}/finish`,
     body,
   );
@@ -111,7 +111,7 @@ export async function authenticate(mode: 'default' | 'conditional' = 'default'):
     return '';
   }
 
-  const authRes = await casaNorteAuthApi.post<ApiResponse<StartAuthData>>(
+  const authRes = await authApi.post<ApiResponse<StartAuthData>>(
     '/casa-norte/webauthn/authenticate',
     { application },
   );
@@ -165,7 +165,7 @@ export async function authenticate(mode: 'default' | 'conditional' = 'default'):
     application,
   };
 
-  const finishRes = await casaNorteAuthApi.post<ApiResponse<FinishRegistrationResponse>>(
+  const finishRes = await authApi.post<ApiResponse<FinishRegistrationResponse>>(
     `/casa-norte/webauthn/authenticate/${provisionalId}`,
     body,
   );
